@@ -1,28 +1,17 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include <esp32cam.h>
-
-#define PE1 digitalRead(pe1)
-#define PE2 digitalRead(pe2)
-const int pe1 = 12;
-const int pe2 = 13;
-const int pe3 = 15;
-const int pe4 = 14;
-const int pintrigger =2 ;
-const int LED=33;
-unsigned int distancia1, distancia2,distancia3,distancia4;
  
-const char* WIFI_SSID = "Megacable_7980";
-const char* WIFI_PASS = "7777225690";
+const char* WIFI_SSID = " RN8P Mike";
+const char* WIFI_PASS = "Mike1060";
  
 WebServer server(80);
- 
- 
+  
 static auto loRes = esp32cam::Resolution::find(320, 240);
 static auto midRes = esp32cam::Resolution::find(350, 530);
 static auto hiRes = esp32cam::Resolution::find(800, 600);
 
-static int FLASH=4;
+static int FLASH=4; //Pin del flash de la cámara
 void serveJpg()
 {
   auto frame = esp32cam::capture();
@@ -64,74 +53,10 @@ void handleJpgMid()
   serveJpg();
 }
  
-
-void sensoresObstaculos(){
-   // ENVIAR PULSO DE DISPARO EN EL PIN "TRIGGER"
-  digitalWrite(pintrigger, LOW);
-  delayMicroseconds(2);
-  digitalWrite(pintrigger, HIGH);
-  // EL PULSO DURA AL MENOS 10 uS EN ESTADO ALTO
-  delayMicroseconds(10);
-  digitalWrite(pintrigger, LOW);
-//Serial.println("Pulso Enviado");
-unsigned int y1 = 0;
-unsigned int y2 = 0;
-unsigned int y3 = 0;
-unsigned int y4 = 0;
-
-
-  b00:
-  if(PE1 == LOW && PE2 == LOW){
-    delayMicroseconds(1);
-    //Serial.println("Esperando rebote");
-    goto b00;
-  }
-
-  bi:
-    if(PE1 == HIGH){
-      y1++;
-    }
-    if(PE2 == HIGH){
-      y2++;
-    }
-    //Descomentar para usar cuatro sensores
-    /*if(PE3 == HIGH){
-      y3++;
-    }
-    if(PE4 == HIGH){
-      y4++;
-    }*/
-
-    if(PE1 == LOW && PE2 == LOW){
-    //Descomentar para usar cuatro sensores
-    //if(PE1 == LOW && PE2 == LOW && PE3 == LOW && PE4 == LOW){ 
-      goto bf;
-    }
-  
-  delayMicroseconds(1);
-  goto bi;
-  bf:
-
-  //Por calibración, 20 fue el mejor valor, al menos de manera preliminar... 
-  distancia1 = y1 / 20;
-  distancia2 = y2 / 20; 
- 
-  //Serial
-  Serial.print(distancia1);
-  Serial.print(" --cm[1] ");
-  Serial.print(distancia2);
-  Serial.println(" --cm[2] ");
-  if(y1<10)
-    digitalWrite(LED,LOW);
-  delay(200);
- 
-  }
- 
 void  setup(){
   Serial.begin(115200);
   Serial.println();
   pinMode(FLASH, OUTPUT);
-  pinMode(LED,OUTPUT);
   {
     using namespace esp32cam;
     Config cfg;
@@ -145,6 +70,30 @@ void  setup(){
   }
   WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
+   Serial.println("scan start");
+
+  //número de redes detectadas
+  int n = WiFi.scanNetworks();
+  Serial.println("scan done");
+  if (n == 0) {
+      Serial.println("no networks found");
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i) {
+      // Print SSID y RSSI de cada red
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(")");
+      Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+      delay(10);
+    }
+  }
+  Serial.println("");
+
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -161,15 +110,10 @@ void  setup(){
  
   server.begin();
   digitalWrite(FLASH,HIGH);
-
-  pinMode(pe1, INPUT);
-  pinMode(pe2, INPUT);
-  pinMode(pintrigger, OUTPUT);
 }
  
 void loop()
 {
   //digitalWrite(LED,HIGH);
   server.handleClient();
-  //sensoresObstaculos();
 }
