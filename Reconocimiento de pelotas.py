@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import urllib.request
-
+import requests
 #cap = cv2.VideoCapture(0)
 
 verdeBajo = np.array([40,45,107],np.uint8) 
@@ -11,7 +11,7 @@ while True:
   #ret,frame = cap.read()
 
   #if ret==True:
-  url='http://192.168.1.87/cam-hi.jpg'
+  url='http://192.168.4.3/cam-hi.jpg'
   img_resp=urllib.request.urlopen(url)
   imgnp=np.array(bytearray(img_resp.read()),dtype=np.uint8)
   frame = cv2.imdecode(imgnp,-1)
@@ -24,15 +24,24 @@ while True:
     area = cv2.contourArea(c)
     if area > 300:
       M = cv2.moments(c)
-      if (M["m00"]==0): M["m00"]=1
+      if (M["m00"]==0): M["m00"]=1 
       x = int(M["m10"]/M["m00"])
       y = int(M['m01']/M['m00'])
+      if x > 450:
+        res=requests.post("http://192.168.4.1/right")
+      if x < 350:
+        r=requests.post("http://192.168.4.1/left")
+      if 350 < x <450:
+        r=requests.post("http://192.168.4.1/center")
+      #print(res.text)
       cv2.circle(frame, (x,y), 7, (0,255,0), -1)
       font = cv2.FONT_HERSHEY_SIMPLEX
       cv2.putText(frame, '{},{}'.format(x,y),(x+10,y), font, 0.75,(0,255,0),1,cv2.LINE_AA)
       nuevoContorno = cv2.convexHull(c)
       cv2.drawContours(frame, [nuevoContorno], 0, (255,0,0), 3)
     #cv2.imshow('maskAzul',mask)
+    else:
+      r=requests.post("http://192.168.4.1/null") 
   cv2.imshow('frame',frame)
   if cv2.waitKey(1) & 0xFF == ord('s'):
     break
