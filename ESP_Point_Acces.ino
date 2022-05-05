@@ -1,26 +1,25 @@
+//********************************Variables para Configuración AccessPoint*********************
 #include <WiFi.h>
-
-// Red del ESP32
 const char* ssid     = "ESP32-Access-Point";
 const char* password = "123456789";
-
 WiFiServer server(80);
-
-// Variable to store the HTTP request
 String header;
 
 void setup() {
   Serial.begin(115200);
-  WiFi.softAP(ssid, password);
-  Serial.print("AccessPoint IP address: ");
-  Serial.println(WiFi.softAPIP());
-  
-  server.begin();
+  accessPointInit();
 }
 
 void loop(){
   visionPelotas();//Busca centro de pelota, 0-centro,1-derecha,2-izquierda, 3-sin objetivo
 }
+void accessPointInit(){
+  WiFi.softAP(ssid, password);
+  Serial.print("AccessPoint IP address: ");
+  Serial.println(WiFi.softAPIP());
+  server.begin();
+}
+
 int visionPelotas()
 {
 int ball;
@@ -80,4 +79,4 @@ WiFiClient client = server.available();   // Listen for incoming clients
     Serial.println("");
   }
   return ball;
-}  
+} 
