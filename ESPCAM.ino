@@ -12,6 +12,11 @@ static auto midRes = esp32cam::Resolution::find(350, 530);
 static auto hiRes = esp32cam::Resolution::find(800, 600);
 
 static int FLASH=4; //Pin del flash de la cámara
+static int LED=33;  //Pin del LED integrado
+static int PUSH=12; //Pin de Botón para encender o apagar flash
+
+
+
 void serveJpg()
 {
   auto frame = esp32cam::capture();
@@ -57,7 +62,8 @@ void  setup(){
   Serial.begin(115200);
   pinMode(FLASH, OUTPUT);
   pinMode(LED, OUTPUT);
-  digitalWrite(LED,HIGH);
+  //digitalWrite(LED,HIGH);
+  pinMode(PUSH,INPUT);
   {
     using namespace esp32cam;
     Config cfg;
@@ -110,25 +116,18 @@ void  setup(){
   server.on("/cam-mid.jpg", handleJpgMid);
  
   server.begin();
- 
-  digitalWrite(LED,LOW);
-  delay(300);
-  digitalWrite(LED,HIGH);
-  delay(300);
-  digitalWrite(LED,LOW);
-  delay(300);
-  digitalWrite(LED,HIGH);
-  delay(300);
-  digitalWrite(LED,LOW);
-  delay(300);
-  digitalWrite(LED,HIGH);
-  delay(350)
-  digitalWrite(FLASH,HIGH);
-
+  
+  bool enc=1;
+  for (int i=0;i<6;i++){
+    digitalWrite(LED,enc);
+    delay(250);
+    enc = !enc;
+  }
+  bool LIGHT = digitalRead(PUSH);
+  digitalWrite(FLASH,LIGHT);
 }
  
 void loop()
 {
-  //digitalWrite(LED,HIGH);
   server.handleClient();
 }
