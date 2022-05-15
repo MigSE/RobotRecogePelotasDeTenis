@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include <esp32cam.h>
  
-const char* WIFI_SSID = " RN8P Mike";
-const char* WIFI_PASS = "Mike1060";
+const char* WIFI_SSID = "ESP32-Access-Point";  //Wifi del ESP32 Access Point
+const char* WIFI_PASS = "123456789";           //Contraseña de la red
  
 WebServer server(80);
   
@@ -55,8 +55,9 @@ void handleJpgMid()
  
 void  setup(){
   Serial.begin(115200);
-  Serial.println();
   pinMode(FLASH, OUTPUT);
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED,HIGH);
   {
     using namespace esp32cam;
     Config cfg;
@@ -109,7 +110,21 @@ void  setup(){
   server.on("/cam-mid.jpg", handleJpgMid);
  
   server.begin();
+ 
+  digitalWrite(LED,LOW);
+  delay(300);
+  digitalWrite(LED,HIGH);
+  delay(300);
+  digitalWrite(LED,LOW);
+  delay(300);
+  digitalWrite(LED,HIGH);
+  delay(300);
+  digitalWrite(LED,LOW);
+  delay(300);
+  digitalWrite(LED,HIGH);
+  delay(350)
   digitalWrite(FLASH,HIGH);
+
 }
  
 void loop()
