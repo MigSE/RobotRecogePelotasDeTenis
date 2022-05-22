@@ -1,18 +1,32 @@
 import cv2
 import numpy as np
 import requests
+from os import system,name
+from time import sleep
+
+def clear():
+   # for windows
+  if name == 'nt':
+    _ = system('cls')
+
+   # for mac and linux
+  else:
+    _ = system('clear')
+
 
 cap = cv2.VideoCapture(0)
+cap.set(3, 1920)
+cap.set(4, 1080)
 
-resx=640 #resolución de cámara
+#resx=640resolución de cámara
 x=0
 verdeBajo = np.array([25,45,107],np.uint8) #100
 verdeAlto = np.array([75,255,255],np.uint8) #125   
 while True:
 
   ret,frame = cap.read()
-  #print("resolucion")
-  #print(frame.shape[:2])
+  print("resolucion",frame.shape[:2])
+  resy,resx=frame.shape[:2]
   if ret==True:
     frameHSV = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(frameHSV,verdeBajo,verdeAlto)
@@ -28,10 +42,10 @@ while True:
         if (M["m00"]==0): M["m00"]=1
         y = int(M["m10"]/M["m00"])
         x = int(M['m01']/M['m00'])
-        print("x:")
-        print(x)
-        print("y")
-        print(y)
+        
+        print("x:",x)
+        print("y:",y)
+        
         cv2.circle(frame, (x,y), 7, (0,255,0), -1)
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(frame, '{},{}'.format(x,y),(x+10,y), font, 0.75,(0,255,0),1,cv2.LINE_AA)
@@ -54,7 +68,7 @@ while True:
           #r=requests.post("http://192.168.4.1/null") 
           print("no hay pelota")
     x=0
-    
+    clear()
     #if cv2.waitKey(1) & 0xFF == ord('s'):
     #  break
 cap.release()
