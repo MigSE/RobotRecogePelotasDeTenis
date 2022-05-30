@@ -15,59 +15,63 @@ def clear():
 
 
 cap = cv2.VideoCapture(0)
-cap.set(3, 1920)
-cap.set(4, 1080)
 
 #resx=640resolución de cámara
 x=0
+y=0
 verdeBajo = np.array([25,45,107],np.uint8) #100
 verdeAlto = np.array([75,255,255],np.uint8) #125   
 while True:
 
   ret,frame = cap.read()
-  print("resolucion",frame.shape[:2])
+ # print("resolucion",frame.shape[:2])
   resy,resx=frame.shape[:2]
   if ret==True:
     frameHSV = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(frameHSV,verdeBajo,verdeAlto)
     contornos,_ = cv2.findContours(mask, cv2.RETR_EXTERNAL,
-      cv2.CHAIN_APPROX_SIMPLE)
-    #cv2.drawContours(frame, contornos, -1, (255,0,0), 3)
+    cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, contornos, -1, (255,0,0), 3)
     for c in contornos:
       area = cv2.contourArea(c)
-      #print("area:")
-      #print(area)
-      if area > 3000:
+      if  area > 300:
+        print("area",area)
         M = cv2.moments(c)
         if (M["m00"]==0): M["m00"]=1
-        y = int(M["m10"]/M["m00"])
-        x = int(M['m01']/M['m00'])
-        
+        x = int(M["m10"]/M["m00"])
+        y = int(M['m01']/M['m00'])
         print("x:",x)
         print("y:",y)
+        
         
         cv2.circle(frame, (x,y), 7, (0,255,0), -1)
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(frame, '{},{}'.format(x,y),(x+10,y), font, 0.75,(0,255,0),1,cv2.LINE_AA)
         nuevoContorno = cv2.convexHull(c)
         cv2.drawContours(frame, [nuevoContorno], 0, (255,0,0), 3)
-    #cv2.imshow('maskAzul',mask)
+     #cv2.imshow('maskAzul',mask)
     #cv2.imshow('frame',frame)
-    if x > resx/2+(.1*resx):
-      #res=requests.post("http://192.168.4.1/right")
-      print("pelota a la derecha")
-    else: 
-      if 0 < x < resx/2-(.1*resx):
-        #r=requests.post("http://192.168.4.1/left")
-        print("pelota a la izquierda")
-      else: 
-        if resx/2-(.1*resx) < x < resx/2+(.1*resx): 
-          #r=requests.post("http://192.168.4.1/center")
-          print("pelota en el centro")
-        else:
-          #r=requests.post("http://192.168.4.1/null") 
-          print("no hay pelota")
+    if  y < 400:
+        
+	    if 0 < x < resx/2-(80):
+	        res=requests.post("http://192.168.4.1/right")
+	        print("pelota a la derecha")
+	    else: 
+	      if x > resx/2+(80):
+	        r=requests.post("http://192.168.4.1/left")
+	        print("pelota a la izquierda")
+	      else: 
+	        if resx/2-(80) < x < resx/2+(80): 
+	          r=requests.post("http://192.168.4.1/center")
+	          print("pelota en el centro")
+	        else:
+	        	r=requests.post("http://192.168.4.1/null") 
+		        print("no hay pelota")
+    else:
+	    print("no hay pelota")
     x=0
+    y=0
+    sleep(0.1)
     clear()
     #if cv2.waitKey(1) & 0xFF == ord('s'):
     #  break
