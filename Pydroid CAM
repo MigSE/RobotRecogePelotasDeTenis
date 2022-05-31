@@ -1,9 +1,15 @@
-import cv2
-import numpy as np
+#********************* NEXT GEN ********************
+#*********************** 2022 **********************
+#***************** DISEÑO MECATRONICO **************
+
+# BIBLIOTECAS 
+import cv2			#OPENCV
+import numpy as np		
 import requests
 from os import system,name
 from time import sleep
 
+# FUNCION PARA BORRAR PANTALLA
 def clear():
    # for windows
   if name == 'nt':
@@ -13,18 +19,16 @@ def clear():
   else:
     _ = system('clear')
 
-
-cap = cv2.VideoCapture(0)
-
-#resx=640resolución de cámara
-x=0
+x=0	
 y=0
-verdeBajo = np.array([25,45,107],np.uint8) #100
-verdeAlto = np.array([75,255,255],np.uint8) #125   
+
+cap = cv2.VideoCapture(0)				#CAPTURA DE VIDEO DE LA CAMARA
+verdeBajo = np.array([25,45,107],np.uint8) #100		#LIMITE INFERIOR DEL COLOR DE LA PELOTA
+verdeAlto = np.array([75,255,255],np.uint8) #125   	#LIMITE SUPERIOER DEL COLOR DE LA PELOTA
+
 while True:
 
   ret,frame = cap.read()
- # print("resolucion",frame.shape[:2])
   resy,resx=frame.shape[:2]
   if ret==True:
     frameHSV = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
@@ -35,11 +39,12 @@ while True:
     for c in contornos:
       area = cv2.contourArea(c)
       if  area > 300:
-        print("area",area)
         M = cv2.moments(c)
         if (M["m00"]==0): M["m00"]=1
         x = int(M["m10"]/M["m00"])
         y = int(M['m01']/M['m00'])
+	
+	#MUESTRA COORDENADAS DEL CENTROIDE DE LA PELOTA
         print("x:",x)
         print("y:",y)
         
@@ -49,10 +54,9 @@ while True:
         cv2.putText(frame, '{},{}'.format(x,y),(x+10,y), font, 0.75,(0,255,0),1,cv2.LINE_AA)
         nuevoContorno = cv2.convexHull(c)
         cv2.drawContours(frame, [nuevoContorno], 0, (255,0,0), 3)
-     #cv2.imshow('maskAzul',mask)
-    #cv2.imshow('frame',frame)
+	
+# PUBLICACION DE UBICACION DE PELOTA
     if  y < 400:
-        
 	    if 0 < x < resx/2-(80):
 	        res=requests.post("http://192.168.4.1/right")
 	        print("pelota a la derecha")
@@ -73,7 +77,5 @@ while True:
     y=0
     sleep(0.1)
     clear()
-    #if cv2.waitKey(1) & 0xFF == ord('s'):
-    #  break
 cap.release()
 cv2.destroyAllWindows()
